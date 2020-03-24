@@ -12,7 +12,11 @@ namespace upc {
 
     for (unsigned int l = 0; l < r.size(); ++l) {
   		/// \TODO Compute the autocorrelation r[l]
+      for (unsigned int k = 0; k < r.size()-l; ++k){
+        r[l] += x[l+k]*x[k];
+      }
     }
+    /// \HECHO Autocorrelation computed
 
     if (r[0] == 0.0F) //to avoid log() and divide zero 
       r[0] = 1e-10; 
@@ -27,6 +31,10 @@ namespace upc {
     switch (win_type) {
     case HAMMING:
       /// \TODO Implement the Hamming window
+      for (unsigned int i = 0; i < frameLen; i++){
+        window.assign(i, 0.53836 - 0.46164*cos((2*M_PI*i)/(frameLen-1)) ); 
+      }
+      /// \HECHO Ventana de Hamming
       break;
     case RECT:
     default:
