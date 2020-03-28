@@ -11,13 +11,14 @@ namespace upc {
   void PitchAnalyzer::autocorrelation(const vector<float> &x, vector<float> &r) const {
 
     for (unsigned int l = 0; l < r.size(); ++l) {
-  		/// \TODO Compute the autocorrelation r[l]
-      for (unsigned int k = 0; k < r.size()-l; ++k){
-        r[l] += x[l+k]*x[k];
+  		/// \HECHO Compute the autocorrelation r[l]
+      for (unsigned int k = l; k < r.size(); ++k){
+        r[l] = 0;
+        r[l] = r[l] + x[k-l]*x[k];
       }
+      r[l] /= r.size();
     }
-    /// \HECHO Autocorrelation computed
-
+    
     if (r[0] == 0.0F) //to avoid log() and divide zero 
       r[0] = 1e-10; 
   }
@@ -30,11 +31,11 @@ namespace upc {
 
     switch (win_type) {
     case HAMMING:
-      /// \TODO Implement the Hamming window
-      for (unsigned int i = 0; i < frameLen; i++){
-        window.assign(i, 0.53836 - 0.46164*cos((2*M_PI*i)/(frameLen-1)) ); 
+      /// \HECHO Implement the Hamming window
+      for (unsigned int i = 0; i < frameLen; ++i){
+        window[i] = 25/46 - (1-25/46)*cos((2*M_PI*i)/(frameLen-1)); 
       }
-      /// \HECHO Ventana de Hamming
+
       break;
     case RECT:
     default:
@@ -59,13 +60,12 @@ namespace upc {
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
 
-    if(r1norm < 0.1*rmaxnorm){
+    if(r1norm < 0.8 || rmaxnorm < 0.3){
       return true;
     } else {
       return false;
     }
 
-    /// \HECHO Basado en la relación entre una muestra y la siguiente    
   }
 
   float PitchAnalyzer::compute_pitch(vector<float> & x) const {
@@ -81,7 +81,7 @@ namespace upc {
     //Compute correlation
     autocorrelation(x, r);
 
-    vector<float>::const_iterator iR = r.begin(), iRMax = iR;
+    vector<float>::const_iterator iR = r.begin(), iRMax = iR, iRMin = iR;
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
@@ -91,8 +91,21 @@ namespace upc {
     ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
 
+    for(iR+=npitch_min; iR < r.begin()+npitch_max; ++iR){
+      if(*iR > *iRMax){
+        iRMax = iR;
+      }
+      if(r.begin() == iRMin && *iR < 0){
+        iRMin = iR;
+      }
+    }
+    
     unsigned int lag = iRMax - r.begin();
 
+    /*if(lag == 0){
+      lag= iRMin - r.begin();
+    }*/
+    
     float pot = 10 * log10(r[0]);
 
     //You can print these (and other) features, look at them using wavesurfer
