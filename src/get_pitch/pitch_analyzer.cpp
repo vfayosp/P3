@@ -12,7 +12,7 @@ namespace upc {
 
     for (unsigned int l = 0; l < r.size(); ++l) {
   		/// \HECHO Compute the autocorrelation r[l]
-      for (unsigned int k = l; k < r.size(); ++k){
+      for (unsigned int k = l; k < r.size()- l; ++k){
         r[l] = 0;
         r[l] = r[l] + x[k-l]*x[k];
       }
@@ -20,7 +20,7 @@ namespace upc {
     }
     
     if (r[0] == 0.0F) //to avoid log() and divide zero 
-      r[0] = 1e-10; 
+      r[0] = 1e-6; 
   }
 
   void PitchAnalyzer::set_window(Window win_type) {
@@ -60,7 +60,7 @@ namespace upc {
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
     float zcr = compute_zeros(x);
-    if((r1norm < 0.8 || rmaxnorm < 0.3) && zcr < 400){ //aparentemente la tasa de cruces por 0 aumenta en plan un montón como de 100 a 800, pos más o menos 400, pero busquemos si es posible un valor experimental
+    if(zcr < 7000){ //aparentemente la tasa de cruces por 0 aumenta en plan un montón como de 100 a 800, pos más o menos 400, pero busquemos si es posible un valor experimental
       return true;
     } else {
       return false;
@@ -81,7 +81,7 @@ namespace upc {
     //Compute correlation
     autocorrelation(x, r);
 
-    //vector<float>::const_iterator iR = r.begin(), iRMax = iR, iRMin = iR;
+    
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
@@ -90,22 +90,19 @@ namespace upc {
 	///    - The lag corresponding to the maximum value of the pitch.
     ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
-
-    /*for(iR+=npitch_min; iR < r.begin()+npitch_max; ++iR){
-      if(*iR > *iRMax){
+  
+    vector<float>::const_iterator iR = r.begin(), iRMax = iR, iRMin = iR;
+    
+    iRMax = iR + npitch_min;
+    for(iR = r.begin() + npitch_min; iR != r.begin() + npitch_max; iR++) {
+      if(*iR > *iRMax){ 
         iRMax = iR;
       }
-      if(r.begin() == iRMin && *iR < 0){
-        iRMin = iR;
-      }
-    }*/
+    }
+   
+    unsigned int lag = iRMax - r.begin();
     
-    unsigned int lag = compute_lag(r);
 
-    /*if(lag == 0){
-      lag= iRMin - r.begin();
-    }*/
-    
     float pot = 10 * log10(r[0]);
 
     //You can print these (and other) features, look at them using wavesurfer
@@ -118,7 +115,7 @@ namespace upc {
     
     if (unvoiced(pot, r[1]/r[0], r[lag]/r[0], x))
       return 0;
-    else
+    else 
       return (float) samplingFreq/(float) lag;
   }
 
@@ -133,20 +130,27 @@ namespace upc {
     /// \HECHO Función de tasa de cruces por 0 para detectar voiced sound
   }
   int PitchAnalyzer::compute_lag(vector<float> r) const {
-    int aux, lag;
+    int aux = 0;
+    int lag = 0;
     float max = 0;
-    for(int i = 0; i < r.size(); i++) {
+    float average = 0;
+    
+    for(int i = 0; i < r.size() - 10; i++) {
       if (r[i] < 0) {
         aux = i;
       }
     }
-    // Buscamos el primer valor negativo tal que evitamos el pico del origen
-    for(int i = 0; i < r.size() - aux; i++) {
+    for(int i = aux; i < r.size() - aux; i++) {
       if (r[i] > max) {
         max = r[i];
         lag = i;
+        if (lag != 0) {
+          //average
+        }
       }
     }
+    
+    printf("lag: %d\n", lag);
     return lag;
     /// \HECHO Función de encontrar la posición del siguiente pico fuera del origen
   }

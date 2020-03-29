@@ -61,7 +61,7 @@ namespace upc {
 					float min_F0 = MIN_F0,		///< Pitch range should be restricted to be above this value
 					float max_F0 = MAX_F0		///< Pitch range should be restricted to be below this value
 				 )
-	{
+	  {
       frameLen = fLen;
       samplingFreq = sFreq;
       set_f0_range(min_F0, max_F0);
