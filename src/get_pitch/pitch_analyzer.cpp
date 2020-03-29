@@ -55,17 +55,17 @@ namespace upc {
       npitch_max = frameLen/2;
   }
 
-  bool PitchAnalyzer::unvoiced(float pot, float r1norm, float rmaxnorm) const {
+  bool PitchAnalyzer::unvoiced(float pot, float r1norm, float rmaxnorm, vector<float> x) const {
     /// \TODO Implement a rule to decide whether the sound is voiced or not.
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
-
-    if(r1norm < 0.8 || rmaxnorm < 0.3){
+    float zcr = compute_zeros(x);
+    if((r1norm < 0.8 || rmaxnorm < 0.3) && zcr < 400){ //aparentemente la tasa de cruces por 0 aumenta en plan un montón como de 100 a 800, pos más o menos 400, pero busquemos si es posible un valor experimental
       return true;
     } else {
       return false;
     }
-
+    /// \HECHO Agregar el uso de tasa de cruces por 0 a la detección de unvoiced
   }
 
   float PitchAnalyzer::compute_pitch(vector<float> & x) const {
@@ -116,9 +116,38 @@ namespace upc {
       cout << pot << '\t' << r[1]/r[0] << '\t' << r[lag]/r[0] << endl;
 #endif
     
-    if (unvoiced(pot, r[1]/r[0], r[lag]/r[0]))
+    if (unvoiced(pot, r[1]/r[0], r[lag]/r[0], x))
       return 0;
     else
       return (float) samplingFreq/(float) lag;
+  }
+
+  float PitchAnalyzer::compute_zeros(vector<float> x) const {
+    float zeros = 0;
+    for(int i = 0; i < x.size() - 1; i++) {
+      if (x[i] * x[i + 1] > 0) {
+        zeros++;
+      }
+    }
+    return samplingFreq*zeros/(2*(x.size() - 1));
+    /// \HECHO Función de tasa de cruces por 0 para detectar voiced sound
+  }
+  int PitchAnalyzer::compute_lag(vector<float> r) const {
+    int aux, lag;
+    float max = 0;
+    for(int i = 0; i < r.size(); i++) {
+      if (r[i] < 0) {
+        aux = i;
+      }
+    }
+    // Buscamos el primer valor negativo tal que evitamos el pico del origen
+    for(int i = 0; i < r.size() - aux; i++) {
+      if (r[i] > max) {
+        max = r[i];
+        lag = i;
+      }
+    }
+    return lag;
+    /// \HECHO Función de encontrar la posición del siguiente pico fuera del origen
   }
 }
