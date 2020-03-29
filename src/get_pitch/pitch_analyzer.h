@@ -50,6 +50,10 @@ namespace upc {
 
     int PitchAnalyzer::compute_lag(vector<float> x) const;
 
+    void PitchAnalyzer::swap(float &a, float &b);
+
+    void PitchAnalyzer::median_filter(vector<float> &r);
+
   public:
     PitchAnalyzer(	unsigned int fLen,			///< Frame length in samples
 					unsigned int sFreq,			///< Sampling rate in Hertzs

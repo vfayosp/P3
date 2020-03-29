@@ -128,7 +128,7 @@ namespace upc {
       if (x[i] * x[i + 1] > 0) {
         zeros++;
       }
-    }
+    } 
     return samplingFreq*zeros/(2*(x.size() - 1));
     /// \HECHO Función de tasa de cruces por 0 para detectar voiced sound
   }
@@ -149,5 +149,28 @@ namespace upc {
     }
     return lag;
     /// \HECHO Función de encontrar la posición del siguiente pico fuera del origen
+  }
+
+  void PitchAnalyzer::median_filter(vector<float> &r) {
+    vector<float> auxVector = r;
+    vector<float> window(3);
+    int j = 0;
+    for(int i = 0; i < r.size() - 2; i++) {
+      window[0] = auxVector[i], window[1] = auxVector[i+1], window[2] = auxVector[i+2];
+      while(!(window[1] > window[0] && window[1] < window[2])) {
+        if (window[j%3] > window[(j+1)%3]) {
+          swap(window[j%3], window[(j+1)%3]);
+        }
+        j++;
+      }
+      r[i] = window[1];
+      j = 0;
+    }
+  }
+
+  void PitchAnalyzer::swap(float &a, float &b) {
+    a = a + b;
+    b = a - b;
+    a = a - b;
   }
 }
