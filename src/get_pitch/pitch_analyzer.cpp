@@ -81,7 +81,7 @@ namespace upc {
     //Compute correlation
     autocorrelation(x, r);
 
-    vector<float>::const_iterator iR = r.begin(), iRMax = iR, iRMin = iR;
+    //vector<float>::const_iterator iR = r.begin(), iRMax = iR, iRMin = iR;
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
@@ -91,16 +91,16 @@ namespace upc {
     ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
 
-    for(iR+=npitch_min; iR < r.begin()+npitch_max; ++iR){
+    /*for(iR+=npitch_min; iR < r.begin()+npitch_max; ++iR){
       if(*iR > *iRMax){
         iRMax = iR;
       }
       if(r.begin() == iRMin && *iR < 0){
         iRMin = iR;
       }
-    }
+    }*/
     
-    unsigned int lag = iRMax - r.begin();
+    unsigned int lag = compute_lag(r);
 
     /*if(lag == 0){
       lag= iRMin - r.begin();

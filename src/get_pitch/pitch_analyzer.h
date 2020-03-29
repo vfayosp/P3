@@ -44,15 +44,15 @@ namespace upc {
 	///
 	/// Returns true is the frame is unvoiced
 	///
-    bool unvoiced(float pot, float r1norm, float rmaxnorm, vector<float> x) const;
+    bool unvoiced(float pot, float r1norm, float rmaxnorm, std::vector<float> x) const;
 
-    float compute_zeros(vector<float> r) const;
+    float compute_zeros(std::vector<float> r) const;
 
-    int PitchAnalyzer::compute_lag(vector<float> x) const;
+    int compute_lag(std::vector<float> x) const;
 
-    void PitchAnalyzer::swap(float &a, float &b);
+    void swap(float &a, float &b);
 
-    void PitchAnalyzer::median_filter(vector<float> &r);
+    void median_filter(std::vector<float> &r);
 
   public:
     PitchAnalyzer(	unsigned int fLen,			///< Frame length in samples
