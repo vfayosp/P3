@@ -44,8 +44,15 @@ namespace upc {
 	///
 	/// Returns true is the frame is unvoiced
 	///
-    bool unvoiced(float pot, float r1norm, float rmaxnorm) const;
+    bool unvoiced(float pot, float r1norm, float rmaxnorm, std::vector<float> x) const;
 
+    float compute_zeros(std::vector<float> r) const;
+
+    int compute_lag(std::vector<float> x) const;
+
+    void swap(float &a, float &b);
+
+    void median_filter(std::vector<float> &r);
 
   public:
     PitchAnalyzer(	unsigned int fLen,			///< Frame length in samples
@@ -54,7 +61,7 @@ namespace upc {
 					float min_F0 = MIN_F0,		///< Pitch range should be restricted to be above this value
 					float max_F0 = MAX_F0		///< Pitch range should be restricted to be below this value
 				 )
-	{
+	  {
       frameLen = fLen;
       samplingFreq = sFreq;
       set_f0_range(min_F0, max_F0);

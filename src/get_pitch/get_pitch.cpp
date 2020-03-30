@@ -10,8 +10,8 @@
 
 #include "docopt.h"
 
-#define FRAME_LEN   0.030 /* 30 ms. */
-#define FRAME_SHIFT 0.015 /* 15 ms. */
+#define FRAME_LEN   0.010 /* 30 ms. */
+#define FRAME_SHIFT 0.005 /* 15 ms. */
 
 using namespace std;
 using namespace upc;
@@ -60,13 +60,21 @@ int main(int argc, const char *argv[]) {
 
   // Define analyzer
   PitchAnalyzer analyzer(n_len, rate, PitchAnalyzer::HAMMING, 50, 500);
-
   /// \TODO
   /// Preprocess the input signal in order to ease pitch estimation. For instance,
   /// central-clipping or low pass filtering may be used.
   
   // Iterate for each frame and save values in f0 vector
   vector<float>::iterator iX;
+
+  float umbral = 0.001;
+
+  for(iX = x.begin(); iX != x.end(); iX++) {
+    if ((*iX > 0 && *iX < umbral) || (*iX < 0 && *iX > umbral)) {
+      *iX = 0;
+    }
+  }
+
   vector<float> f0;
   for (iX = x.begin(); iX + n_len < x.end(); iX = iX + n_shift) {
     float f = analyzer(iX, iX + n_len);
@@ -76,7 +84,25 @@ int main(int argc, const char *argv[]) {
   /// \TODO
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
+  /*
+  unsigned int tamano_ventana = 5;
+  int pos;
+  if (tamano_ventana % 2 == 1) {
+    pos = (tamano_ventana - 1)/2;
+  } else {
+    pos = tamano_ventana/2;
+  }
 
+  vector<float> ventana(tamano_ventana);
+
+  for(unsigned int i = 0; i < f0.size() - 2; i++) {
+    for(unsigned int j = 0; j < tamano_ventana; j++) {
+      ventana[j] = f0[i+j];
+    }
+    sort(ventana.begin(), ventana.end());
+    f0[i] = ventana[pos];
+  }
+*/
   // Write f0 contour into the output file
   ofstream os(output_txt);
   if (!os.good()) {
