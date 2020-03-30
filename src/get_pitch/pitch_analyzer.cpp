@@ -9,16 +9,18 @@ using namespace std;
 /// Name space of UPC
 namespace upc {
   void PitchAnalyzer::autocorrelation(const vector<float> &x, vector<float> &r) const {
-
+    FILE *f = fopen("datos.txt", "a");
     for (unsigned int l = 0; l < r.size(); ++l) {
   		/// \HECHO Compute the autocorrelation r[l]
       for (unsigned int k = l; k < r.size()- l; ++k){
         r[l] = 0;
         r[l] = r[l] + x[k-l]*x[k];
+        
       }
       r[l] /= r.size();
+      fprintf(f, "%.16f\n", x[l]);
     }
-    
+    fclose(f);
     if (r[0] == 0.0F) //to avoid log() and divide zero 
       r[0] = 1e-6; 
   }
@@ -60,7 +62,7 @@ namespace upc {
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
     float zcr = compute_zeros(x);
-    if(zcr < 7000){ //aparentemente la tasa de cruces por 0 aumenta en plan un montón como de 100 a 800, pos más o menos 400, pero busquemos si es posible un valor experimental
+    if(zcr < 7000) { //aparentemente la tasa de cruces por 0 aumenta en plan un montón como de 100 a 800, pos más o menos 400, pero busquemos si es posible un valor experimental
       return true;
     } else {
       return false;
@@ -80,7 +82,7 @@ namespace upc {
 
     //Compute correlation
     autocorrelation(x, r);
-
+    printf("size: %d\n", r.size());
     
 
     /// \TODO 
@@ -99,12 +101,11 @@ namespace upc {
         iRMax = iR;
       }
     }
-   
-    unsigned int lag = iRMax - r.begin();
     
+    unsigned int lag = iRMax - r.begin();
+    lag = compute_lag(r)*1.8;
 
     float pot = 10 * log10(r[0]);
-
     //You can print these (and other) features, look at them using wavesurfer
     //Based on that, implement a rule for unvoiced
     //change to #if 1 and compile
@@ -133,24 +134,19 @@ namespace upc {
     int aux = 0;
     int lag = 0;
     float max = 0;
-    float average = 0;
     
-    for(int i = 0; i < r.size() - 10; i++) {
+    for(int i = 0; i < r.size() - 0; i++) {
       if (r[i] < 0) {
         aux = i;
       }
     }
-    for(int i = aux; i < r.size() - aux; i++) {
+    for(int i = aux/2; i < r.size() - aux/2; i++) {
       if (r[i] > max) {
         max = r[i];
         lag = i;
-        if (lag != 0) {
-          //average
-        }
       }
     }
-    
-    printf("lag: %d\n", lag);
+    //printf("lag1: %d\n", lag);
     return lag;
     /// \HECHO Función de encontrar la posición del siguiente pico fuera del origen
   }

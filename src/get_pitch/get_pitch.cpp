@@ -10,8 +10,8 @@
 
 #include "docopt.h"
 
-#define FRAME_LEN   0.030 /* 30 ms. */
-#define FRAME_SHIFT 0.015 /* 15 ms. */
+#define FRAME_LEN   0.010 /* 30 ms. */
+#define FRAME_SHIFT 0.005 /* 15 ms. */
 
 using namespace std;
 using namespace upc;
@@ -84,7 +84,7 @@ int main(int argc, const char *argv[]) {
   /// \TODO
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
-  
+  /*
   unsigned int tamano_ventana = 5;
   int pos;
   if (tamano_ventana % 2 == 1) {
@@ -102,7 +102,7 @@ int main(int argc, const char *argv[]) {
     sort(ventana.begin(), ventana.end());
     f0[i] = ventana[pos];
   }
-
+*/
   // Write f0 contour into the output file
   ofstream os(output_txt);
   if (!os.good()) {
